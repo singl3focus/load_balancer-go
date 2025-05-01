@@ -1,0 +1,31 @@
+# Data
+/postgres_data/
+
+# Configs, env files
+*.env
+/config.yaml
+
+# Go workspace file
+go.work
+go.work.sum
+
+# Binaries for programs and plugins
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+
+# IDEs and editors
+.vscode/
+.idea/
+.project
+.classpath
+.c9/
+*.launch
+.settings/
+*.sublime-workspace
+/shelf/
+/workspace.xml
+
+

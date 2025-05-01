@@ -1,0 +1,78 @@
+services:
+  db-postgres: # postgres
+    container_name: postgres
+    image: postgres:latest
+    environment:
+      POSTGRES_USER: 'postgres'
+      POSTGRES_PASSWORD: 'postgres'
+      POSTGRES_DB: 'postgres'
+    healthcheck:
+      test: [ "CMD", "pg_isready", "-q", "-d", "postgres", "-U", "postgres" ]
+      interval: 3s
+      timeout: 5s
+      retries: 10
+    ports:
+      - "8090:5432"
+    volumes:
+      - ./postgres_data:/var/lib/postgresql/data
+    networks:
+      - load-balancer-net 
+
+  load-balancer-migrations: # balancer
+    build:
+      context: .
+      dockerfile: .docker/balancer/Dockerfile.migrations
+    depends_on:
+      db-postgres:
+        condition: service_healthy
+    networks:
+      - load-balancer-net   
+
+  load-balancer: # balancer
+    build:
+      context: .
+      dockerfile: .docker/balancer/Dockerfile
+    ports:
+      - "8080:8080"
+    depends_on:
+      - load-balancer-migrations
+      - db-postgres
+      - backend1
+      - backend2
+    networks:
+      - load-balancer-net      
+
+  backend1: # main test backends
+    build:
+      context: .
+      dockerfile: .docker/test-backend/Dockerfile
+    command: ["./server", "-port", "8081"]
+    ports:
+      - "8081:8081"
+    networks:
+      - load-balancer-net   
+
+  backend2:
+    build:
+      context: .
+      dockerfile: .docker/test-backend/Dockerfile
+    command: ["./server", "-port", "8082"]
+    ports:
+      - "8082:8082"
+    networks:
+      - load-balancer-net   
+
+  backend3: # backend for test changing config
+    build:
+      context: .
+      dockerfile: .docker/test-backend/Dockerfile
+    command: ["./server", "-port", "8083"]
+    ports:
+      - "8083:8083"    
+    networks:
+      - load-balancer-net       
+
+networks:
+  load-balancer-net:
+    driver: bridge
+    name: load-balancer-net

@@ -1,0 +1,35 @@
+app:
+  version: "1.0.0" # [STRING]
+  balancer:
+    servers: # LIST[struct{INT,STRING}]
+      - id: 1
+        url: "http://backend1:8081"
+      - id: 2
+        url: "http://backend2:8082"
+      # - id: 3
+      #   url: "http://localhost:8083"
+    healthCheck: 15s # [TIME.DURATION]
+    strategy: "round_robin" # [STRING] - Available: round_robin, least_connections.
+  rate_limit:
+    default_capacity: 100
+    default_fill_rate: 1s
+
+http_server:
+  port: 8080 # [INTEGER]
+  read_header_timeout: 10s # [TIME.DURATION]
+  read_timeout: 20s # [TIME.DURATION]
+  write_timeout: 20s # [TIME.DURATION]
+  idle_timeout: 1m # [TIME.DURATION]
+
+database:
+  migration:
+    dir: "./migrations"  # [STRING]
+    option: ""  # [STRING] - Available: "", up-all, up, down-all, down.
+  postgres: 
+    url: "host=db-postgres port=5432 user=postgres password=postgres dbname=postgres sslmode=disable" # [STRING]
+
+logging:
+  enable: true # [BOOLEAN]
+  level: INFO # [STRING] - Available: INFO, WARNING, ERROR.
+  format: JSON # [STRING] - Available: JSON, TXT.
+
